@@ -1,0 +1,240 @@
+---
+- name: Set SEBool for SSH Auth
+  ansible.posix.seboolean:
+    name: pam_duo_permit_sshd
+    state: yes
+    persistent: yes
+  when: ssh_auth
+
+- name: Set SEBool for local Auth
+  ansible.posix.seboolean:
+    name: pam_duo_permit_local_login
+    state: yes
+    persistent: yes
+  when: all_auth
+
+- name: Determine pam_duo.so path
+  command:
+    cmd: "find / -name pam_duo.so"
+  register: pam_duo_path
+  changed_when: pam_duo_path.stdout != "/usr/lib64/security/pam_duo.so"
+
+### SSH Auth ###
+- name: Configure sshd auth required pam_sepermit
+  community.general.pamd:
+    name: sshd
+    type: auth
+    control: include
+    module_path: postlogin
+    new_type: auth
+    new_control: required
+    new_module_path: pam_sepermit.so
+    state: before
+  when: ssh_auth and not all_auth
+
+- name: Configure sshd auth required pam_env
+  community.general.pamd:
+    name: sshd
+    type: auth
+    control: required
+    module_path: pam_sepermit.so
+    new_type: auth
+    new_control: required
+    new_module_path: pam_env.so
+    state: after
+  when: ssh_auth and not all_auth
+
+- name: Configure sshd auth sufficient pam_duo
+  community.general.pamd:
+    name: sshd
+    type: auth
+    control: required
+    module_path: pam_env.so
+    new_type: auth
+    new_control: sufficient
+    new_module_path: "{{ pam_duo_path.stdout }}"
+    state: after
+  when: ssh_auth and not all_auth
+
+- name: Configure sshd auth requisite pam_succeed_if
+  community.general.pamd:
+    name: sshd
+    type: auth
+    control: sufficient
+    module_path: "{{ pam_duo_path.stdout }}"
+    new_type: auth
+    new_control: requisite
+    new_module_path: pam_succeed_if.so
+    module_arguments:
+      - uid
+      - '>='
+      - '1000'
+      - quiet_success
+    state: after
+  when: ssh_auth and not all_auth
+
+- name: Configure sshd auth required pam_deny
+  community.general.pamd:
+    name: sshd
+    type: auth
+    control: requisite
+    module_path: pam_succeed_if.so
+    new_type: auth
+    new_control: required
+    new_module_path: pam_deny.so
+    state: after
+  when: ssh_auth and not all_auth
+
+- name: Configure sshd auth substack password-auth
+  community.general.pamd:
+    name: sshd
+    type: auth
+    control: substack
+    module_path: password-auth
+    state: absent
+  when: ssh_auth and not all_auth
+
+### Sudo Auth ###
+
+- name: Configure pam_env for sudo PAM
+  community.general.pamd:
+    name: sudo
+    type: auth
+    control: include
+    module_path: system-auth
+    new_type: auth
+    new_control: required
+    new_module_path: pam_env.so
+    state: after
+  when: sudo_auth and not all_auth
+
+- name: Configure pam_unix for sudo PAM
+  community.general.pamd:
+    name: sudo
+    type: auth
+    control: required
+    module_path: pam_env.so
+    new_type: auth
+    new_control: requisite
+    new_module_path: pam_unix.so
+    state: after
+  when: sudo_auth and not all_auth
+
+- name: Configure pam_duo for sudo PAM
+  community.general.pamd:
+    name: sudo
+    type: auth
+    control: requisite
+    module_path: pam_unix.so
+    new_type: auth
+    new_control: sufficient
+    new_module_path: "{{ pam_duo_path.stdout }}"
+    state: after
+  when: sudo_auth and not all_auth
+
+- name: Configure pam_deny for sudo PAM
+  community.general.pamd:
+    name: sudo
+    type: auth
+    control: sufficient
+    module_path: "{{ pam_duo_path.stdout }}"
+    new_type: auth
+    new_control: required
+    new_module_path: pam_deny.so
+    state: after
+  when: sudo_auth and not all_auth
+
+- name: Remove system-auth for sudo PAM
+  community.general.pamd:
+    name: sudo
+    type: auth
+    control: substack
+    module_path: system-auth
+    state: absent
+  when: sudo_auth and not all_auth
+
+### Su Auth ###
+- name: Configure pam_unix for su PAM
+  community.general.pamd:
+    name: su
+    type: auth
+    control: sufficient
+    module_path: pam_rootok.so
+    new_type: auth
+    new_control: requisite
+    new_module_path: pam_unix.so
+    state: after
+  when: sudo_auth and not all_auth
+
+- name: Configure pam_duo for su PAM
+  community.general.pamd:
+    name: su
+    type: auth
+    control: requisite
+    module_path: pam_unix.so
+    new_type: auth
+    new_control: sufficient
+    new_module_path: "{{ pam_duo_path.stdout }}"
+    state: after
+  when: sudo_auth and not all_auth
+
+- name: Configure pam_deny for su PAM
+  community.general.pamd:
+    name: su
+    type: auth
+    control: sufficient
+    module_path: "{{ pam_duo_path.stdout }}"
+    new_type: auth
+    new_control: required
+    new_module_path: pam_deny.so
+    state: after
+  when: sudo_auth and not all_auth
+
+- name: Remove system-auth for su PAM
+  community.general.pamd:
+    name: su
+    type: auth
+    control: include
+    module_path: system-auth
+    state: absent
+
+### Sytem Wide Auth ###
+
+- name: Configure pam_unix sufficient MFA
+  community.general.pamd:
+    name: system-auth
+    type: auth
+    control: sufficient
+    module_path: pam_unix.so
+    module_arguments:
+      - nullok
+      - try_first_pass
+    state: absent
+  when: all_auth and not sudo_auth
+
+- name: Configure system-auth requisite pam_unix
+  community.general.pamd:
+    name: system-auth
+    type: auth
+    control: required
+    module_path: pam_env.so
+    new_type: auth
+    new_control: requisite
+    new_module_path: pam_unix.so
+    module_arguments:
+      - nullok
+      - try_first_pass
+    state: after
+  when: all_auth and not sudo_auth and not ssh_auth
+
+- name: Configure system-auth auth sufficient pam_duo
+  community.general.pamd:
+    name: system-auth
+    type: auth
+    control: requisite
+    module_path: pam_unix.so
+    new_type: auth
+    new_control: sufficient
+    new_module_path: "{{ pam_duo_path.stdout }}"
+    state: after
+  when: all_auth and not sudo_auth and not ssh_auth

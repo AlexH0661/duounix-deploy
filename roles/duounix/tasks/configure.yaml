@@ -1,0 +1,12 @@
+---
+- name: Deploy Duo Unix configuration
+  template:
+    src: pam_duo.conf.j2
+    dest: /etc/duo/pam_duo.conf
+
+- name: Deploy Duo Unix login configuration
+  template:
+    src: login_duo.conf.j2
+    dest: /etc/duo/login_duo.conf
+  when: duo_login
+

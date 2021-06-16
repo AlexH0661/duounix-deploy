@@ -1,0 +1,5 @@
+---
+ssh_auth: True
+sudo_auth: False
+all_auth: False
+duo_login: False

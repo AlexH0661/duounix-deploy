@@ -1,0 +1,5 @@
+# Required additional roles
+
+## From Ansible Galaxy
+- src: community.general
+- src: ansible.posix

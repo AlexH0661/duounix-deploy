@@ -1,0 +1,18 @@
+---
+- name: sshd config - AuthenticationMethods
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regex: "^AuthenticationMethods"
+    line: AuthenticationMethods "publickey,keyboard-interactive""password,keyboard-interactive"
+
+- name: sshd config - UsePAM
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regex: "^UsePAM"
+    line: UsePAM yes
+
+- name: sshd config - UseDNS
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regex: "^UseDNS"
+    line: UseDNS no

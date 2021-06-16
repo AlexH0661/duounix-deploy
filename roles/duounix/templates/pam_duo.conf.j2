@@ -1,0 +1,12 @@
+[duo]
+; Duo integration key
+ikey = {{ INTEGRATION_KEY }}
+; Duo secret key
+skey = {{ SECRET_KEY }}
+; Duo API hostname
+host = {{ API_HOSTNAME }}
+; Additional Duo Configuration
+failmode = {{ duo_failmode | default("safe") }}
+pushinfo = {{ duo_pushinfo | default("yes") }}
+autopush = {{ duo_autopush | default("yes") }}
+prompts = {{ duo_prompts | default("1") }}
