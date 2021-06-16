@@ -4,6 +4,7 @@
     path: /etc/ssh/sshd_config
     regex: "^(#AuthenticationMethods|AuthenticationMethods)"
     line: AuthenticationMethods "publickey,keyboard-interactive""password,keyboard-interactive"
+  when: ssh_auth
 
 - name: sshd config - UsePAM
   lineinfile:
