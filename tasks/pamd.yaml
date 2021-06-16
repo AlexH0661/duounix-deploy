@@ -17,6 +17,7 @@
   command:
     cmd: "find / -name pam_duo.so"
   register: pam_duo_path
+  failed_when: '"pam_duo.so" not in pam_duo_path.stdout'
   changed_when: pam_duo_path.stdout != "/usr/lib64/security/pam_duo.so"
 
 ### SSH Auth ###

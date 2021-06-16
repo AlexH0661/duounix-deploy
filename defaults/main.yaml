@@ -1,5 +1,5 @@
 ---
-ssh_auth: True
-sudo_auth: False
+ssh_auth: False
+sudo_auth: True
 all_auth: False
 duo_login: False
