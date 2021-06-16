@@ -2,7 +2,7 @@
 - name: sshd config - AuthenticationMethods
   lineinfile:
     path: /etc/ssh/sshd_config
-    regex: "^AuthenticationMethods"
+    regex: "^(#AuthenticationMethods|AuthenticationMethods)"
     line: AuthenticationMethods "publickey,keyboard-interactive""password,keyboard-interactive"
 
 - name: sshd config - UsePAM
@@ -14,5 +14,5 @@
 - name: sshd config - UseDNS
   lineinfile:
     path: /etc/ssh/sshd_config
-    regex: "^UseDNS"
+    regex: "^(#UseDNS|UseDNS)"
     line: UseDNS no
