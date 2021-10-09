@@ -96,7 +96,6 @@
   when: ssh_auth and not all_auth
 
 ### Sudo Auth ###
-
 - name: Configure pam_env for sudo PAM
   community.general.pamd:
     name: sudo
@@ -200,8 +199,7 @@
     state: absent
 
 ### Sytem Wide Auth ###
-
-- name: Configure pam_unix sufficient MFA
+- name: Configure pam_unix sufficient system-auth
   community.general.pamd:
     name: system-auth
     type: auth

@@ -21,5 +21,8 @@
 
 - name: Install Duo Unix
   yum:
-    name: duo_unix
+    name:
+      - openssl-devel
+      - pam-devel
+      - duo_unix
     state: latest

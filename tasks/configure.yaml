@@ -10,3 +10,14 @@
     dest: /etc/duo/login_duo.conf
   when: duo_login
 
+- name: Configure SELinux to allow duo_pam for local_auth
+  ansible.posix.seboolean:
+    name: pam_duo_permit_local_login
+    state: yes
+    persistent: yes
+
+- name: Configure SELinux to allow duo_pam for sshd_auth
+  ansible.posix.seboolean:
+    name: pam_duo_permit_sshd
+    state: yes
+    persistent: yes

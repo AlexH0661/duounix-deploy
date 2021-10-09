@@ -1,4 +1,5 @@
 ansible.cfg
-inventory
-TODO.md
+inventory.ini
 playbook.yaml
+group_vars/
+host_vars/

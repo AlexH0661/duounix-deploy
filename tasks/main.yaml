@@ -1,17 +1,13 @@
 ---
 
-- name: Import install task
-  import_tasks: install.yaml
+- import_tasks: install.yaml
   when: ansible_facts['os_family'] == "RedHat"
 
-- name: Import configure task
-  import_tasks: configure.yaml
+- import_tasks: configure.yaml
   when: ansible_facts['os_family'] == "RedHat"
 
-- name: Import pamd task
-  import_tasks: pamd.yaml
+- import_tasks: pamd.yaml
   when: ansible_facts['os_family'] == "RedHat"
 
-- name: Import sshd task
-  import_tasks: sshd.yaml
+- import_tasks: sshd.yaml
   when: ansible_facts['os_family'] == "RedHat"

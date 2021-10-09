@@ -11,9 +11,3 @@
     path: /etc/ssh/sshd_config
     regex: "^UsePAM"
     line: UsePAM yes
-
-- name: sshd config - UseDNS
-  lineinfile:
-    path: /etc/ssh/sshd_config
-    regex: "^(#UseDNS|UseDNS)"
-    line: UseDNS no
