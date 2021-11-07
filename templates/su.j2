@@ -1,0 +1,14 @@
+#%PAM-1.0
+{{ ansible_managed | comment }}
+auth       sufficient pam_rootok.so
+auth       requisite pam_unix.so
+auth       sufficient {{ pam_duo_path.stdout }}
+auth       required pam_deny.so
+auth       substack system-auth
+auth       include postlogin
+account    sufficient pam_succeed_if.so uid = 0 use_uid quiet
+account    include system-auth
+password   include system-auth
+session    include system-auth
+session    include postlogin
+session    optional pam_xauth.so

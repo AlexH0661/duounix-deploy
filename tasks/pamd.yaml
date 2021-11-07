@@ -96,107 +96,20 @@
   when: ssh_auth and not all_auth
 
 ### Sudo Auth ###
-- name: Configure pam_env for sudo PAM
-  community.general.pamd:
-    name: sudo
-    type: auth
-    control: include
-    module_path: system-auth
-    new_type: auth
-    new_control: required
-    new_module_path: pam_env.so
-    state: after
-  when: sudo_auth and not all_auth
-
-- name: Configure pam_unix for sudo PAM
-  community.general.pamd:
-    name: sudo
-    type: auth
-    control: required
-    module_path: pam_env.so
-    new_type: auth
-    new_control: requisite
-    new_module_path: pam_unix.so
-    state: after
-  when: sudo_auth and not all_auth
-
-- name: Configure pam_duo for sudo PAM
-  community.general.pamd:
-    name: sudo
-    type: auth
-    control: requisite
-    module_path: pam_unix.so
-    new_type: auth
-    new_control: sufficient
-    new_module_path: "{{ pam_duo_path.stdout }}"
-    state: after
-  when: sudo_auth and not all_auth
-
-- name: Configure pam_deny for sudo PAM
-  community.general.pamd:
-    name: sudo
-    type: auth
-    control: sufficient
-    module_path: "{{ pam_duo_path.stdout }}"
-    new_type: auth
-    new_control: required
-    new_module_path: pam_deny.so
-    state: after
-  when: sudo_auth and not all_auth
-
-- name: Remove system-auth for sudo PAM
-  community.general.pamd:
-    name: sudo
-    type: auth
-    control: substack
-    module_path: system-auth
-    state: absent
+- name: Configure sudo PAM
+  ansible.builtin.template:
+    src: sudo.j2
+    dest: /etc/pam.d/sudo
+    backup: yes
   when: sudo_auth and not all_auth
 
 ### Su Auth ###
-- name: Configure pam_unix for su PAM
-  community.general.pamd:
-    name: su
-    type: auth
-    control: sufficient
-    module_path: pam_rootok.so
-    new_type: auth
-    new_control: requisite
-    new_module_path: pam_unix.so
-    state: after
+- name: Configure su PAM
+  ansible.builtin.template:
+    src: su.j2
+    dest: /etc/pam.d/su
+    backup: yes
   when: sudo_auth and not all_auth
-
-- name: Configure pam_duo for su PAM
-  community.general.pamd:
-    name: su
-    type: auth
-    control: requisite
-    module_path: pam_unix.so
-    new_type: auth
-    new_control: sufficient
-    new_module_path: "{{ pam_duo_path.stdout }}"
-    state: after
-  when: sudo_auth and not all_auth
-
-- name: Configure pam_deny for su PAM
-  community.general.pamd:
-    name: su
-    type: auth
-    control: sufficient
-    module_path: "{{ pam_duo_path.stdout }}"
-    new_type: auth
-    new_control: required
-    new_module_path: pam_deny.so
-    state: after
-  when: sudo_auth and not all_auth
-
-- name: Remove system-auth for su PAM
-  community.general.pamd:
-    name: su
-    type: auth
-    control: include
-    module_path: system-auth
-    state: absent
 
 ### Sytem Wide Auth ###
 - name: Configure pam_unix sufficient system-auth
