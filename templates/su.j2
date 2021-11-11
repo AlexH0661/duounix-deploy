@@ -1,10 +1,17 @@
 #%PAM-1.0
 {{ ansible_managed | comment }}
 auth       sufficient pam_rootok.so
-auth       requisite pam_unix.so
-auth       sufficient {{ pam_duo_path.stdout }}
+auth       required pam_env.so
+auth       required pam_faildelay.so delay=2000000
+auth       [default=1 ignore=ignore success=ok] pam_usertype.so isregular
+auth       [default=2 ignore=ignore success=ok] pam_localuser.so
+auth       required pam_unix.so nullok try_first_pass
+auth       sufficient /usr/lib64/security/pam_duo.so
+auth       [default=2 ignore=ignore success=ok] pam_usertype.so isregular
+auth       required pam_sss.so forward_pass
+auth       sufficient /usr/lib64/security/pam_duo.so
 auth       required pam_deny.so
-auth       substack system-auth
+#auth      substack system-auth
 auth       include postlogin
 account    sufficient pam_succeed_if.so uid = 0 use_uid quiet
 account    include system-auth
