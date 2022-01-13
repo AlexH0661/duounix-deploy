@@ -10,3 +10,5 @@ failmode = {{ duo_failmode | default("safe") }}
 pushinfo = {{ duo_pushinfo | default("yes") }}
 autopush = {{ duo_autopush | default("yes") }}
 prompts = {{ duo_prompts | default("1") }}
+fallback_local_ip = {{ duo_fallback_local_ip | default("yes") }}
+groups = !root
